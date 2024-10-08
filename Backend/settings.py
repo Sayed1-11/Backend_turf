@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-n8p%0av@%y-c-$d@nia^96*=f0_#c@a=!ko&=un5pfq3ve7n)q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://backend-turf.onrender.com','http://127.0.0.1:8000/']
 
 MAX_OTP_TRY = 3
 AUTH_USER_MODEL = "User.UserModel"
