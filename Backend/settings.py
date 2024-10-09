@@ -37,6 +37,10 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://backend-turf.onrender.com',
+    
+]
 INSTALLED_APPS = [
     'daphne',
     'channels',
