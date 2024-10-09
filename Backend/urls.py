@@ -27,7 +27,7 @@ from Booking.views import TurfBookingViewSet, BadmintonBookingViewSet, SwimmingB
 
 router = DefaultRouter()
 router.register(r"user",UserViewset,basename="user")
-router.register(r"update",UserProfileUpdateViewset,basename="update")
+router.register(r"user_update",UserProfileUpdateViewset,basename="update")
 router.register(r"turfs", TurfViewSet, basename="turfs")
 router.register(r'sports', SportsViewSet)
 router.register(r'facilities', FacilitiesViewSet)
