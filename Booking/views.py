@@ -5,16 +5,15 @@ from .serializers import (
     BadmintonBookingSerializer,
     SwimmingBookingSerializer,
 )
+from rest_framework.permissions import IsAuthenticated
+
 
 class TurfBookingViewSet(viewsets.ModelViewSet):
     queryset = Turf_Booking.objects.all()
     serializer_class = TurfBookingSerializer
-
+    permission_classes = [IsAuthenticated]
     def perform_create(self, serializer):
-        # Create the booking
         booking = serializer.save()
-
-        # Update the corresponding slots
         booking.turf_slot.is_booked = True
         booking.turf_slot.is_available = False
         booking.turf_slot.save()
@@ -22,12 +21,9 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
 class BadmintonBookingViewSet(viewsets.ModelViewSet):
     queryset = Badminton_Booking.objects.all()
     serializer_class = BadmintonBookingSerializer
-
+    permission_classes = [IsAuthenticated]
     def perform_create(self, serializer):
-        # Create the booking
         booking = serializer.save()
-
-        # Update the corresponding slots
         booking.badminton_slot.is_booked = True
         booking.badminton_slot.is_available = False
         booking.badminton_slot.save()
@@ -35,12 +31,9 @@ class BadmintonBookingViewSet(viewsets.ModelViewSet):
 class SwimmingBookingViewSet(viewsets.ModelViewSet):
     queryset = Swimming_Booking.objects.all()
     serializer_class = SwimmingBookingSerializer
-
+    permission_classes = [IsAuthenticated]
     def perform_create(self, serializer):
-        # Create the booking
         booking = serializer.save()
-
-        # Update the corresponding slots
         booking.swimming_slot.is_booked = True
         booking.swimming_slot.is_available = False
         booking.swimming_slot.save()
