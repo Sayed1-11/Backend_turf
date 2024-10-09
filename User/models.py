@@ -35,6 +35,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     ]
      
     phone_number = models.CharField(max_length=11,unique=True,null=False,blank=False,validators=[phone_regex])
+    profile_image = models.ImageField(upload_to='profile_image/',null=True)
     email = models.EmailField(null=True,blank=True, validators=[validate_email])
     name = models.CharField(max_length=255, null=True, blank=True)  
     birthdate = models.DateField(null=True, blank=True)  
@@ -42,7 +43,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     address = models.TextField(null=True, blank=True)  
     otp = models.CharField(max_length=4)
     otp_expiry = models.DateTimeField(null=True, blank=True)
-    max_otp_try = models.CharField(max_length=2,default=settings.MAX_OTP_TRY)
+    max_otp_try = models.IntegerField(default=settings.MAX_OTP_TRY)
     otp_max_out = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
