@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from .models import UserModel
 from .utils import send_otp
-from datetime import datetime, timedelta
+from django.utils import timezone
+import pytz
+from datetime import timedelta
+local_tz = pytz.timezone('Asia/Dhaka')
 import random
 from django.conf import settings
 
@@ -9,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = (
+            'id',
             "phone_number", 
         )
 
@@ -16,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         otp = random.randint(1000, 9999)
-        otp_expiry = datetime.now() + timedelta(minutes=10)
+        otp_expiry = timezone.now().astimezone(local_tz) + timedelta(minutes=2)
         user = UserModel(
             phone_number=validated_data["phone_number"],
             otp=otp,
@@ -34,6 +38,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "email",
+            'profile_image',
             "name",
             "birthdate",
             "phone_number",
