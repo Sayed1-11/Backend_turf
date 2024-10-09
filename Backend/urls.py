@@ -22,16 +22,17 @@ from rest_framework.routers import DefaultRouter
 from User.views import UserViewset,UserProfileUpdateViewset
 from rest_framework.authtoken.views import obtain_auth_token
 from Turf.views import TurfViewSet,SportsViewSet,TimeSlotViewSet,PriceViewSet,SportFieldViewSet,FacilitiesViewSet,TimeSlotEligibilityViewSet,FieldTypeChoicesView
-from Slot.views import BadmintonSlotViewSet,TurfSlotViewSet,SwimmingSessionViewSet,SwimmingSlotViewSet
+from Slot.views import BadmintonSlotViewSet,TurfSlotViewSet,SwimmingSessionViewSet,SwimmingSlotViewSet,SlotHistoryViewSet
 from Booking.views import TurfBookingViewSet, BadmintonBookingViewSet, SwimmingBookingViewSet
 
 router = DefaultRouter()
 router.register(r"user",UserViewset,basename="user")
-router.register(r"user_update",UserProfileUpdateViewset,basename="update")
+router.register(r"user-update",UserProfileUpdateViewset,basename="update")
 router.register(r"turfs", TurfViewSet, basename="turfs")
 router.register(r'sports', SportsViewSet)
 router.register(r'facilities', FacilitiesViewSet)
 router.register(r'time-slots', TimeSlotViewSet)
+router.register(r'slot-history', SlotHistoryViewSet, basename='slot-history')
 router.register(r'Booking', TurfBookingViewSet)
 router.register(r'Badminton', BadmintonBookingViewSet)
 router.register(r'Swimming_booking', SwimmingBookingViewSet)
