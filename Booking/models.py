@@ -92,8 +92,6 @@ class Swimming_Booking(BaseBooking):
 def update_swimming_slot_status(sender, instance, **kwargs):
     if instance.status == 'confirmed':
         instance.swimming_slot.is_booked = True
-        instance.swimming_slot.is_available = False
     elif instance.status == 'canceled':
         instance.swimming_slot.is_booked = False
-        instance.swimming_slot.is_available = True
     instance.swimming_slot.save()
