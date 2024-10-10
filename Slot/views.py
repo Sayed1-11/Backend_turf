@@ -5,11 +5,14 @@ from rest_framework.response import Response
 from django.core.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
 
 class TurfSlotViewSet(viewsets.ModelViewSet):
     queryset = TurfSlot.objects.all()
     serializer_class = TurfSlotSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -38,7 +41,8 @@ class BadmintonSlotViewSet(viewsets.ModelViewSet):
     queryset = BadmintonSlot.objects.all()
     serializer_class = BadmintonSlotSerializer
     permission_classes = [IsAuthenticated]
-
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -66,6 +70,7 @@ class SwimmingSessionViewSet(viewsets.ModelViewSet):
     queryset = SwimmingSession.objects.all()
     serializer_class = SwimmingSessionSerializer
     permission_classes = [IsAuthenticated]
+    
     @action(detail=True, methods=['get'])
     def remaining_capacity(self, request, pk=None):
         session = self.get_object()
@@ -81,7 +86,8 @@ class SwimmingSlotViewSet(viewsets.ModelViewSet):
     queryset = SwimmingSlot.objects.all()
     serializer_class = SwimmingSlotSerializer
     permission_classes = [IsAuthenticated]
-
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -110,7 +116,8 @@ class SlotHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = SlotHistory.objects.all()
     serializer_class = SlotHistorySerializer
     permission_classes = [IsAuthenticated]
-
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user', 'booking_date']
     @action(detail=False, methods=['get'])
     def history_by_date(self, request):
         date = request.query_params.get('date')
