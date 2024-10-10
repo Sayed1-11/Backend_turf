@@ -16,21 +16,22 @@ class TurfSlotViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        slot_id = serializer.data['id']
         slot_instance = serializer.save()
-
         try:
             total_price = slot_instance.calculate_price()
             print("Prices: ", total_price)
             print('\n')
             slot_instance.is_available = False
             slot_instance.save()
+            
             SlotHistory.objects.create(
                 user=request.user,
                 turf_slot=slot_instance,
                 booking_date=slot_instance.date,
                 total_price=total_price
             )
-            return Response({'message': 'Slot booked successfully!', 'total_price': total_price}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'Slot booked successfully!', 'total_price': total_price,'slot_id': slot_id}, status=status.HTTP_201_CREATED)
             
             
         except ValidationError as e:
@@ -46,6 +47,7 @@ class BadmintonSlotViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        slot_id = serializer.data['id']
         slot_instance = serializer.save()
 
         try:
@@ -60,7 +62,7 @@ class BadmintonSlotViewSet(viewsets.ModelViewSet):
                 booking_date=slot_instance.date,
                 total_price=total_price
             )
-            return Response({'message': 'Slot booked successfully!', 'total_price': total_price}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'Slot booked successfully!', 'total_price': total_price,'slot_id': slot_id}, status=status.HTTP_201_CREATED)
             
             
         except ValidationError as e:
@@ -87,11 +89,13 @@ class SwimmingSlotViewSet(viewsets.ModelViewSet):
     serializer_class = SwimmingSlotSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
+    
     filterset_fields = ['user']
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        slot_id = serializer.data['id']
         slot_instance = serializer.save()
 
         try:
@@ -105,7 +109,7 @@ class SwimmingSlotViewSet(viewsets.ModelViewSet):
                 booking_date=slot_instance.date,
                 total_price=total_price
             )
-            return Response({'message': 'Slot booked successfully!', 'total_price': total_price}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'Slot booked successfully!', 'total_price': total_price,'slot_id': slot_id}, status=status.HTTP_201_CREATED)
             
             
         except ValidationError as e:
