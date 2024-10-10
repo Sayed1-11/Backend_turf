@@ -12,7 +12,7 @@ class TurfSlotViewSet(viewsets.ModelViewSet):
     serializer_class = TurfSlotSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['user']
+    filterset_fields = ['user','id']
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -43,7 +43,7 @@ class BadmintonSlotViewSet(viewsets.ModelViewSet):
     serializer_class = BadmintonSlotSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['user']
+    filterset_fields = ['user','id']
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -90,7 +90,7 @@ class SwimmingSlotViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     
-    filterset_fields = ['user']
+    filterset_fields = ['user','id']
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
