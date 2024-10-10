@@ -10,6 +10,8 @@ class TurfViewSet(viewsets.ModelViewSet):
     queryset = Turf.objects.all()
     serializer_class = TurfSerializer
     permission_classes = [IsAuthenticated | IsAdminUser]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['sports']
     def get_queryset(self):
         return Turf.objects.prefetch_related(
             'facilities', 'sports', 'fields', 'fields__prices', 'slot_eligibilities'
