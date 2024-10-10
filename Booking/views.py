@@ -14,7 +14,7 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
     serializer_class = TurfBookingSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['status','user']
+    filterset_fields = ['status','user','turf_slot']
     def perform_create(self, serializer):
         booking = serializer.save()
         booking.turf_slot.is_booked = True
@@ -37,7 +37,7 @@ class BadmintonBookingViewSet(viewsets.ModelViewSet):
     serializer_class = BadmintonBookingSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['status','user']
+    filterset_fields = ['status','user','badminton_slot']
     def perform_create(self, serializer):
         booking = serializer.save()
         booking.badminton_slot.is_booked = True
@@ -59,7 +59,7 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
     serializer_class = SwimmingBookingSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['status','user']
+    filterset_fields = ['status','user','swimming_slot']
     def perform_create(self, serializer):
         booking = serializer.save()
         booking.swimming_slot.is_booked = True
