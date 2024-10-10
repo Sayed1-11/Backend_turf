@@ -5,7 +5,7 @@ from .models import Turf, Sports, TimeSlot, Price,SportField,Facility,SlotEligib
 from .serializers import TurfSerializer, SportsSerializer, TimeSlotSerializer, PriceSerializer,SportFieldSerializer,FacilitySerializer,SlotEligibilitySerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-
+from django_filters.rest_framework import DjangoFilterBackend
 class TurfViewSet(viewsets.ModelViewSet):
     queryset = Turf.objects.all()
     serializer_class = TurfSerializer
