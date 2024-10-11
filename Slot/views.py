@@ -121,7 +121,7 @@ class SlotHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = SlotHistorySerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['user', 'booking_date']
+    filterset_fields = ['user', 'booking_date','turf_slot','badminton_slot','swimming_slot']
     @action(detail=False, methods=['get'])
     def history_by_date(self, request):
         date = request.query_params.get('date')
