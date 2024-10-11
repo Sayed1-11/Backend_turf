@@ -5,7 +5,9 @@ from .models import Turf, Sports, TimeSlot, Price,SportField,Facility,SlotEligib
 from .serializers import TurfSerializer, SportsSerializer, TimeSlotSerializer, PriceSerializer,SportFieldSerializer,FacilitySerializer,SlotEligibilitySerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django.middleware.csrf import get_token
 from django_filters.rest_framework import DjangoFilterBackend
+
 class TurfViewSet(viewsets.ModelViewSet):
     queryset = Turf.objects.all()
     serializer_class = TurfSerializer
@@ -45,14 +47,18 @@ class SportsViewSet(viewsets.ModelViewSet):
     queryset = Sports.objects.all()
     serializer_class = SportsSerializer
     permission_classes = [IsAuthenticated | IsAdminUser]
+    
 class FacilitiesViewSet(viewsets.ModelViewSet):
     queryset = Facility.objects.all()
     serializer_class = FacilitySerializer
     permission_classes = [IsAuthenticated | IsAdminUser]
+    
 class SportFieldViewSet(viewsets.ModelViewSet):
     queryset = SportField.objects.all()
     serializer_class = SportFieldSerializer
     permission_classes = [IsAuthenticated | IsAdminUser]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['turf']
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -75,11 +81,15 @@ class TimeSlotEligibilityViewSet(viewsets.ModelViewSet):
     queryset = SlotEligibility.objects.all()
     serializer_class = SlotEligibilitySerializer
     permission_classes = [IsAuthenticated | IsAdminUser]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['turf']
 
 class PriceViewSet(viewsets.ModelViewSet):
     queryset = Price.objects.all()
     serializer_class = PriceSerializer
     permission_classes = [IsAuthenticated | IsAdminUser]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['turf']
     
 class FieldTypeChoicesView(APIView):
     permission_classes = [IsAuthenticated | IsAdminUser]
