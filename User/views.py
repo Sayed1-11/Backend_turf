@@ -8,9 +8,11 @@ from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from datetime import timedelta
+from django_filters.rest_framework import DjangoFilterBackend
 import random
 from django.utils import timezone
 import pytz
+from django.middleware.csrf import get_token
 local_tz = pytz.timezone('Asia/Dhaka')
 from django.conf import settings
 from .models import UserModel
@@ -46,7 +48,6 @@ class UserViewset(viewsets.ModelViewSet):
             current_time = timezone.now().astimezone(local_tz)
             logger.info(f"Verifying OTP for user {pk}")
 
-            # Check if OTP is provided
             provided_otp = request.data.get('otp')
             if not provided_otp:
                 logger.warning("No OTP provided in request")
@@ -63,10 +64,13 @@ class UserViewset(viewsets.ModelViewSet):
 
                 token, created = Token.objects.get_or_create(user=instance)
                 uid = urlsafe_base64_encode(force_bytes(instance.id))
+                csrf_token = get_token(request)
+                
                 return Response({
                     'message': 'OTP verified successfully.',
                     'token': token.key,
-                    'uid': uid
+                    'uid': uid,
+                    'csrfToken': csrf_token
                 }, status=status.HTTP_200_OK)
 
             if provided_otp != instance.otp:
@@ -119,7 +123,8 @@ class UserViewset(viewsets.ModelViewSet):
 class UserProfileUpdateViewset(viewsets.ModelViewSet):
     queryset = UserModel.objects.all()
     serializer_class = UserProfileUpdateSerializer
-
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id']
     @action(detail=True, methods=['PATCH'])
     def update_profile(self, request, pk=None):
         instance = self.get_object()
