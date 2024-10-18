@@ -28,19 +28,57 @@ class UserViewset(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
+        phone_number = request.data.get('phone_number')
+        
+        if phone_number:
+            # Check if a user with this phone number already exists
+            existing_user = UserModel.objects.filter(phone_number=phone_number).first()
+            if existing_user:
+                # Directly generate OTP for the existing user
+                logger.info(f"User with phone number {phone_number} already exists. Generating OTP.")
+                return self.generate_otp_for_existing_user(existing_user)
+
+        # Proceed with user creation if no existing user
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         user_id = serializer.data['id']
+        print(user_id)
         logger.info(f"User with ID {user_id} created successfully.")
-        
+
         return Response(
             {'message': 'User created successfully.', 'user_id': user_id},
             status=status.HTTP_201_CREATED,
             headers=headers
         )
+    def generate_otp_for_existing_user(self, user):
+        current_time = timezone.now().astimezone(local_tz)
+        otp_max_out = user.otp_max_out.astimezone(local_tz) if user.otp_max_out else None
 
+        if user.max_otp_try == 0:
+            if otp_max_out is not None and current_time < otp_max_out:
+                return Response(
+                    {'message': 'Max OTP try reached, try again after the 1 minute.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                user.max_otp_try = settings.MAX_OTP_TRY  
+
+        otp = random.randint(1000, 9999)
+        otp_expiry = current_time + timedelta(minutes=2)
+        user.max_otp_try -= 1
+        user.otp = otp
+        user.otp_expiry = otp_expiry
+
+        if user.max_otp_try == 0:
+            user.otp_max_out = current_time + timedelta(minutes=1)
+        else:
+            user.otp_max_out = None
+
+        user.save()
+        send_otp(user.phone_number, otp)
+        return Response({'message': 'OTP generated successfully.', 'user_id': user.id}, status=status.HTTP_200_OK) 
     @action(detail=True, methods=['PATCH'])
     def verify_otp(self, request, pk=None):
         try:
@@ -88,40 +126,8 @@ class UserViewset(viewsets.ModelViewSet):
             logger.error(f"Error in verify_otp: {e}", exc_info=True)
             return Response({'error': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    @action(detail=True, methods=['PATCH'])
-    def generate_otp(self, request, pk=None):
-        instance = self.get_object()
+    
 
-
-        current_time = timezone.now().astimezone(local_tz)
-        otp_max_out = instance.otp_max_out.astimezone(local_tz) if instance.otp_max_out else None
-
-
-        if instance.max_otp_try == 0 :
-            if otp_max_out is not None and current_time < otp_max_out:
-                return Response(
-                    {'message': 'Max OTP try reached, try again after the 1 minute.'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            
-            else:
-                instance.max_otp_try = settings.MAX_OTP_TRY  
-        
-
-        otp = random.randint(1000, 9999)
-        otp_expiry = current_time + timedelta(minutes=2)
-        instance.max_otp_try -= 1
-        instance.otp = otp
-        instance.otp_expiry = otp_expiry
-
-        if instance.max_otp_try == 0:
-            instance.otp_max_out = current_time + timedelta(minutes=1)
-        else:
-            instance.otp_max_out = None
-
-        instance.save()
-        send_otp(instance.phone_number, otp)
-        return Response({'message': 'OTP generated successfully.', 'otp': otp}, status=status.HTTP_200_OK) 
      
     @action(detail=False, methods=['POST'], url_path="admin-login")
     def admin_login(self, request):
