@@ -20,6 +20,8 @@ from .serializers import UserSerializer,UserProfileUpdateSerializer,AdminLoginSe
 from rest_framework.permissions import AllowAny
 import logging
 from django.core.cache import cache
+import requests
+from decimal import Decimal
 logger = logging.getLogger('User')
 # Create your views here.
 class UserViewset(viewsets.ModelViewSet):
@@ -166,17 +168,61 @@ class UserProfileUpdateViewset(viewsets.ModelViewSet):
     serializer_class = UserProfileUpdateSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['id']
-    @action(detail=True, methods=['PATCH'])
-    def update_profile(self, request, pk=None):
+
+    def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        cached_data = cache.get(f'user_profile_{pk}')
-        if cached_data:
-            return Response(cached_data, status=status.HTTP_200_OK)
+        address = request.data.get('address', None)
+
+        if address:
+            print(address)
+            lat, lon = self.get_lat_lon_from_address(address)
+
+            if lat is not None and lon is not None:
+                try:
+                    # Update instance fields directly
+                    instance.latitude = Decimal(lat)
+                    instance.longitude = Decimal(lon)
+                except (ValueError, TypeError):
+                    return Response({"error": "Invalid latitude or longitude."},
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error": "Unable to fetch coordinates for the given address."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        # Create a serializer with the updated data
         serializer = self.get_serializer(instance, data=request.data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
-            cache.set(f'user_profile_{pk}', serializer.data, timeout=60*15)  # Cache for 15 minutes
             return Response({'message': 'Profile updated successfully.'}, status=status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+    def get_lat_lon_from_address(self, address):
+        print(f"Fetching coordinates for address: {address}")
+        try:
+            url = f"https://nominatim.openstreetmap.org/search?q={address}&format=json&limit=1"
+            headers = {
+                'User-Agent': 'YourAppName/1.0 (your.email@example.com)'  # Customize with your app's name and your email
+            }
+            response = requests.get(url, headers=headers)
+
+            # Check the status code of the response
+            if response.status_code != 200:
+                print(f"Error: Received {response.status_code} from the API")
+                return None, None
+
+            response_data = response.json()
+            if response_data:
+                lat = response_data[0].get("lat")
+                lon = response_data[0].get("lon")
+                print('lat:', lat)
+                print('lon:', lon)
+                return lat, lon
+            else:
+                print(f"No results found for address: {address}")
+                return None, None
+
+        except Exception as e:
+            print(f"Error fetching coordinates: {e}")
+            return None, None
 
