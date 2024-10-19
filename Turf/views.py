@@ -7,9 +7,10 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.middleware.csrf import get_token
 from django_filters.rest_framework import DjangoFilterBackend
-import math
+import math,requests
 from django.db.models import Q,F, FloatField
 from django.db.models.functions import Cast
+from decimal import Decimal
 
 class TurfViewSet(viewsets.ModelViewSet):
     queryset = Turf.objects.all()
@@ -56,9 +57,61 @@ class TurfViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
     def perform_create(self, serializer):
-        serializer.save(User=self.request.user)
-    
+        instance = self.get_object()
+        location =  request.data.get('location', instance.location)
+        if location:
+            print(location)
+            lat, lon = self.get_lat_lon_from_address(location)
 
+            if lat is not None and lon is not None:
+                try:
+                    # Update instance fields directly
+                    instance.latitude = Decimal(lat)
+                    instance.longitude = Decimal(lon)
+                except (ValueError, TypeError):
+                    return Response({"error": "Invalid latitude or longitude."},
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error": "Unable to fetch coordinates for the given address."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        # Create a serializer with the updated data
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.save(User=self.request.user)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Turf updated successfully.'}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def get_lat_lon_from_address(self, address):
+        print(f"Fetching coordinates for address: {address}")
+        try:
+            url = f"https://nominatim.openstreetmap.org/search?q={address}&format=json&limit=1"
+            headers = {
+                'User-Agent': 'YourAppName/1.0 (your.email@example.com)'  # Customize with your app's name and your email
+            }
+            response = requests.get(url, headers=headers)
+
+            # Check the status code of the response
+            if response.status_code != 200:
+                print(f"Error: Received {response.status_code} from the API")
+                return None, None
+
+            response_data = response.json()
+            if response_data:
+                lat = response_data[0].get("lat")
+                lon = response_data[0].get("lon")
+                print('lat:', lat)
+                print('lon:', lon)
+                return lat, lon
+            else:
+                print(f"No results found for address: {address}")
+                return None, None
+
+        except Exception as e:
+            print(f"Error fetching coordinates: {e}")
+            return None, None
     def calculate_distance(self, user_latitude, user_longitude):
         # Haversine formula to calculate distance
         return Cast(
