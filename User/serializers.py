@@ -53,36 +53,14 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
             "phone_number",
             "gender",
             "address",
+            "longitude",
+            "latitude"
         )
+
+        read_only_fields = ["longitude",
+            "latitude"]
     def update(self, instance, validated_data):
-        # Update the address if it's changed
-        address = validated_data.get("address", instance.address)
-        
-        if address and address != instance.address:
-            lat, lon = self.get_lat_lon_from_address(address)
-            if lat and lon:
-                instance.latitude = lat
-                instance.longitude = lon
-
-        # Update other fields as usual
         return super().update(instance, validated_data)
-
-    def get_lat_lon_from_address(self, address):
-        try:
-            # Use OpenStreetMap's Nominatim API to get coordinates from address
-            url = f"https://nominatim.openstreetmap.org/search?q={address}&format=json&limit=1"
-            response = requests.get(url)
-            response_data = response.json()
-
-            if response_data:
-                lat = response_data[0].get("lat")
-                lon = response_data[0].get("lon")
-                return lat, lon
-
-        except Exception as e:
-            # Handle errors, optionally log them
-            print(f"Error fetching coordinates: {e}")
-            return None, None
 
 class AdminUserSignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
