@@ -123,10 +123,10 @@ class TurfSerializer(serializers.ModelSerializer):
     class Meta:
         model = Turf
         fields = [
-            'id','User', 'name', 'location','phone_number', 'image', 'facilities', 'sports',
-            'available_offers', 'rating', 'fields', 'prices', 'slot_eligibilities','time_slots',
+            'id','User', 'name', 'location','phone_number','latitude','longitude', 'image', 'facilities', 'sports',
+            'available_offers', 'rating', 'fields', 'prices', 'slot_eligibilities','time_slots'
         ]
-        read_only_fields = ['rating','phone_number']
+        read_only_fields = ['rating','phone_number','latitude','longitude']
     def create(self, validated_data):
         # Extract Many-to-Many fields data
         facilities_data = validated_data.pop('facilities', [])
