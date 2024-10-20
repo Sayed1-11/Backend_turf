@@ -16,7 +16,6 @@ class TurfSlotViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        slot_id = serializer.data['id']
         slot_instance = serializer.save()
         try:
             total_price = slot_instance.calculate_price()
@@ -47,7 +46,6 @@ class BadmintonSlotViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        slot_id = serializer.data['id']
         slot_instance = serializer.save()
 
         try:
@@ -95,7 +93,6 @@ class SwimmingSlotViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        slot_id = serializer.data['id']
         slot_instance = serializer.save()
 
         try:
