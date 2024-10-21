@@ -228,8 +228,10 @@ def aamarpay_callback(request):
 
     if payment_status == 'Successful':
         booking.payment_status = 'successful'
-        booking.is_paid_full = True
-        booking.save()
+        if booking.total_amount == booking.advance_payable:
+            booking.is_paid_full = True
+        booking.status = 'confirmed'
+        booking.save() 
         logging.info(f"Payment successful for transaction ID: {transaction_id}")
         return redirect('payment_success')  # Ensure this URL is properly defined in your project
     else:
