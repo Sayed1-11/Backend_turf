@@ -1,5 +1,5 @@
 asgiref==3.8.1
-aamarpay==0.0.2
+aamarpay
 async-timeout==4.0.3
 attrs==24.2.0
 autobahn==24.4.2
