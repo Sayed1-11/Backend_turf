@@ -14,7 +14,6 @@ daphne==4.1.2
 pytz
 pymemcache
 channels-redis==4.2.0
-charset-normalizer==3.3.2
 constantly==23.10.4
 cryptography==43.0.1
 daphne==4.1.2
