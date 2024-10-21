@@ -21,7 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-n8p%0av@%y-c-$d@nia^96*=f0_#c@a=!ko&=un5pfq3ve7n)q'
-
+AAMARPAY_STORE_ID = 'aamarpaytest'
+AAMARPAY_SIGNATURE_KEY = 'dbb74894e82415a2f7ff0ec3a97e4183'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -37,10 +38,6 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://backend-turf.onrender.com',
-    
-]
 INSTALLED_APPS = [
     'daphne',
     'channels',
@@ -52,8 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'django_filters',
     'rest_framework_simplejwt',
+    'django_filters',
     'corsheaders',
     'Booking',
     'Turf',
@@ -103,13 +100,13 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.renderers.JSONRenderer',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
-
 
 CHANNEL_LAYERS = {
     'default': {
