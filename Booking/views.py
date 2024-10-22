@@ -34,6 +34,7 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         booking = serializer.save()
 
         # Update turf_slot status
+        booking.user=request.user
         booking.turf_slot.is_booked = True
         booking.turf_slot.is_available = False
         booking.turf_slot.save()
@@ -94,7 +95,7 @@ class BadmintonBookingViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         booking = serializer.save()
 
-        # Update turf_slot status
+        booking.user=request.user
         booking.badminton_slot.is_booked = True
         booking.badminton_slot.is_available = False
         booking.badminton_slot.save()
@@ -153,7 +154,7 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         booking = serializer.save()
-
+        booking.user=request.user
         booking.swimming_slot.is_booked = True
         booking.swimming_slot.save()
 
