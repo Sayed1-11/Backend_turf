@@ -45,7 +45,7 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         Booking_History.objects.create(
                 turf_book=booking,
                 booking_date=booking.turf_slot.date,
-                total_amount=booking.total_amount,
+                total_price=booking.total_amount,
                 advance_payable=booking.advance_payable,
             )
         booking.turf_slot.save()
@@ -112,7 +112,7 @@ class BadmintonBookingViewSet(viewsets.ModelViewSet):
         Booking_History.objects.create(
                 badminton_slot=booking,
                 booking_date=booking.badminton_slot.date,
-                total_amount=booking.total_amount,
+                total_price=booking.total_amount,
                 advance_payable=booking.advance_payable,
             )
         booking.badminton_slot.save()
@@ -180,7 +180,7 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
         Booking_History.objects.create(
                 swimming_slot=booking,
                 booking_date=booking.swimming_slot.date,
-                total_amount=booking.total_amount,
+                total_price=booking.total_amount,
                 advance_payable=booking.advance_payable,
             )
         booking.save()
