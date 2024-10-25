@@ -90,7 +90,7 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Payment initiation failed.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         logging.info(f"Payment URL: {payment_url}")
-        return Response({'payment_url': payment_url}, status=status.HTTP_200_OK)
+        return Response({'payment_url': payment_url,'transaction id':transaction_id}, status=status.HTTP_200_OK)
         
 class BadmintonBookingViewSet(viewsets.ModelViewSet):
     queryset = Badminton_Booking.objects.all()
@@ -157,7 +157,7 @@ class BadmintonBookingViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Payment initiation failed.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         logging.info(f"Payment URL: {payment_url}")
-        return Response({'payment_url': payment_url}, status=status.HTTP_200_OK)
+        return Response({'payment_url': payment_url,'transaction id':transaction_id}, status=status.HTTP_200_OK)
 
 class SwimmingBookingViewSet(viewsets.ModelViewSet):
     queryset = Swimming_Booking.objects.all()
@@ -221,7 +221,7 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Payment initiation failed.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         logging.info(f"Payment URL: {payment_url}")
-        return Response({'payment_url': payment_url}, status=status.HTTP_200_OK)
+        return Response({'payment_url': payment_url,'transaction id':transaction_id}, status=status.HTTP_200_OK)
 @csrf_exempt
 def aamarpay_callback(request):
     logging.info(f"Callback request data: {request.GET}")
@@ -248,6 +248,7 @@ def aamarpay_callback(request):
         booking.payment_status = 'successful'
         if booking.total_amount == booking.advance_payable:
             booking.is_paid_full = True
+        booking.status = 'confirmed'
         booking.save() 
         logging.info(f"Payment successful for transaction ID: {transaction_id}")
         return redirect('payment_success')  
