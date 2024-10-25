@@ -124,7 +124,7 @@ class Swimming_Booking(BaseBooking):
     swimming_slot = models.ForeignKey(SwimmingSlot, on_delete=models.CASCADE)
     advance_payable = models.DecimalField(max_digits=10, decimal_places=2, default=300.0)
     def save(self, *args, **kwargs):
-        self.total_amount = self.badminton_slot.calculate_price()
+        self.total_amount = self.swimming_slot.calculate_price()
         self.due_amount = self.total_amount - self.advance_payable
         if not self.order_id:
             current_year = datetime.now().year + self.swimming_slot.turf.id
