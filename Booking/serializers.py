@@ -51,7 +51,7 @@ class BadmintonBookingSerializer(serializers.ModelSerializer):
         read_only_fields = ['total_amount','order_id', 'status','created_at', 'discount', 'due_amount','transaction_id','payment_status'] 
     def validate(self, attrs):
         is_paid_full = attrs.get('is_paid_full', False)
-        advance_payable = attrs.get('advance_payable', 0)
+        advance_payable = attrs.get('advance_payable', 200)
         badminton_slot = attrs.get('badminton_slot')
 
         if badminton_slot:
