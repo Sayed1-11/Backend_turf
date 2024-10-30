@@ -123,14 +123,17 @@ class TurfSerializer(serializers.ModelSerializer):
     )
     
     
-
+    review_count = serializers.SerializerMethodField()
     class Meta:
         model = Turf
         fields = [
             'id','User', 'name', 'location','phone_number','latitude','longitude', 'image', 'facilities', 'sports',
-            'available_offers', 'rating', 'fields'
+            'available_offers', 'rating', 'fields','review_count'
         ]
-        read_only_fields = ['rating','phone_number','latitude','longitude']
+        read_only_fields = ['rating','phone_number','latitude','longitude','review_count']
+
+    def get_review_count(self, obj):
+        return obj.reviews.count()
 
     def create(self, validated_data):
         # Extract Many-to-Many fields data with proper validation
