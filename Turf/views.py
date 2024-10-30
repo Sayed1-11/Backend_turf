@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -85,6 +85,18 @@ class TurfViewSet(viewsets.ModelViewSet):
 
         return Response({"error": "Unable to fetch coordinates for the given address."}, status=status.HTTP_400_BAD_REQUEST)
 
+    def update(self, request, pk=None):
+        try:
+            turf = self.get_object()
+            serializer = self.get_serializer(turf, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Log the error
+            print(f"Error occurred: {e}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def get_lat_lon_from_address(self, address):
         print(f"Fetching coordinates for address: {address}")
@@ -213,3 +225,17 @@ class ReviewViewSet(viewsets.ModelViewSet):
         turf = instance.turf  
         super().perform_destroy(instance)  
         turf.update_rating()
+
+
+class ReviewViewSet_perosn(viewsets.ViewSet):
+    queryset = Review.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        user = request.user
+        reviews = Review.objects.filter(user=user)
+        review_serializer = ReviewSerializer(reviews, many=True)
+
+        return Response({
+            'reviews': review_serializer.data
+        })
