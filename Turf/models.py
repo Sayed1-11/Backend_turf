@@ -127,7 +127,7 @@ class SlotEligibility(models.Model):
 
 class Review(models.Model):
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
-    turf = models.ForeignKey(Turf, related_name='ratings', on_delete=models.CASCADE)
+    turf = models.ForeignKey(Turf, related_name='reviews', on_delete=models.CASCADE)
     rating = models.PositiveIntegerField()  # Assuming a 1-5 rating scale
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
