@@ -62,32 +62,29 @@ class TurfViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
     def perform_create(self, serializer):
-        instance = self.get_object()
-        location =  request.data.get('location', instance.location)
-        if location:
-            print(location)
-            lat, lon = self.get_lat_lon_from_address(location)
+        location = self.request.data.get('location')
+        lat, lon = self.get_lat_lon_from_address(location)
+        if lat is not None and lon is not None:
+            # Prepare the validated data with coordinates
+            validated_data = serializer.validated_data.copy()
+            validated_data['latitude'] = Decimal(lat)
+            validated_data['longitude'] = Decimal(lon)
+            print(lat,lon)
+            validated_data['User'] = self.request.user
+            
+            # Create the turf instance
+            turf = serializer.save(**validated_data)
+            facilities_data = self.request.data.get('facilities', [])
+            sports_data = self.request.data.get('sports', [])
 
-            if lat is not None and lon is not None:
-                try:
-                    # Update instance fields directly
-                    instance.latitude = Decimal(lat)
-                    instance.longitude = Decimal(lon)
-                except (ValueError, TypeError):
-                    return Response({"error": "Invalid latitude or longitude."},
-                                    status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({"error": "Unable to fetch coordinates for the given address."},
-                                status=status.HTTP_400_BAD_REQUEST)
+            if facilities_data:
+                turf.facilities.set(facilities_data)
+            if sports_data:
+                turf.sports.set(sports_data)
+            return Response({'message': 'Turf created successfully.'}, status=status.HTTP_201_CREATED)
 
-        # Create a serializer with the updated data
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.save(User=self.request.user)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'Turf updated successfully.'}, status=status.HTTP_200_OK)
+        return Response({"error": "Unable to fetch coordinates for the given address."}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def get_lat_lon_from_address(self, address):
         print(f"Fetching coordinates for address: {address}")
