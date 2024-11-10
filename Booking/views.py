@@ -66,7 +66,7 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         pay = aamarPay(
             isSandbox=True,  # Set to True for sandbox/testing mode
             storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
-            successUrl='https://backend-turf.onrender.com/payment/success/',  # Replace with actual success URL
+            successUrl='https://backend-turf.onrender.com/payment/success/?transaction_id={transaction_id}',  # Replace with actual success URL
             failUrl='https://backend-turf.onrender.com/payment/failure/',  # Replace with actual failure URL
             cancelUrl='https://backend-turf.onrender.com/payment/callback/',  # Replace with actual cancel URL
             transactionID=transaction_id,  # Unique transaction ID
