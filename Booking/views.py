@@ -64,7 +64,7 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         customer_mobile = request.user.phone_number  # Get mobile from request or use a default
         booking_id = request.session.get('booking_id') # Get mobile from request or use a default
         print('booking_id',booking_id)
-        success_url = f'http://127.0.0.1:8000/payment/success/{booking_id}/'
+        success_url = f'https://backend-turf.onrender.com/payment/success/{booking_id}/'
         
         pay = aamarPay(
             isSandbox=True,  # Set to True for sandbox/testing mode
