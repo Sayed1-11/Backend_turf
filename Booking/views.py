@@ -250,7 +250,7 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
 @csrf_exempt
 def aamarpay_callback(request):
     logging.info(f"Callback request data: {request.GET}")
-    transaction_id = request.GET.get('mer_txnid')
+    transaction_id = request.POST.get('mer_txnid')
 
     if not transaction_id:
         logging.error("Missing transaction ID in callback.")
