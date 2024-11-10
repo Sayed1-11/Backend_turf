@@ -61,17 +61,17 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         request.session['booking_id'] = booking.id
         customer_name = request.user.phone_number or "John Doe"
         customer_email = request.user.email or "john.doe@example.com"
-        customer_mobile = request.user.phone_number  # Get mobile from request or use a default
+        customer_mobile = request.user.phone_number 
         booking_id = request.session.get('booking_id') # Get mobile from request or use a default
         print('booking_id',booking_id)
         success_url = f'https://backend-turf.onrender.com/payment/success/{booking_id}/'
-        
+
         pay = aamarPay(
             isSandbox=True,  # Set to True for sandbox/testing mode
             storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
             successUrl=success_url,  # Replace with actual success URL
             failUrl='https://backend-turf.onrender.com/payment/failure/',  # Replace with actual failure URL
-            cancelUrl='https://backend-turf.onrender.com/payment/callback/',   # Replace with actual cancel URL
+            cancelUrl='https://backend-turf.onrender.com/payment/callback/',  # Replace with actual cancel URL
             transactionID=transaction_id,  # Unique transaction ID
             transactionAmount=str(booking.advance_payable),  # Convert to string if required
             signature=settings.AAMARPAY_SIGNATURE_KEY,  # Your actual signature
@@ -87,33 +87,10 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         )
         payment_url = pay.payment()
         if not payment_url:
-            logging.error("Payment URL not found during payment initiation.")
-            booking.delete()  # Optionally delete the booking if payment initiation fails
+            booking.delete()  
             return Response({'error': 'Payment initiation failed.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        logging.info(f"Payment URL: {payment_url}")
         return Response({'payment_url': payment_url,'transaction id':transaction_id}, status=status.HTTP_200_OK)
-def trigger_callback(booking):
-        """
-        Trigger the payment callback for a specific booking using its transaction_id.
-        """
-        transaction_id = booking.transaction_id  # Assuming transaction_id exists on booking model
-        callback_url = "https://backend-turf.onrender.com/payment/callback/"
-        params = {
-            'mer_txnid': transaction_id,
-            'pay_status': 'Successful',
-        }
 
-        # Make the HTTP POST request to the callback URL
-        try:
-            response = requests.post(callback_url, params=params)
-            if response.status_code == 200:
-                print(f"Successfully triggered callback for transaction ID: {transaction_id}")
-            else:
-                print(f"Error calling callback URL: {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            print(f"Error calling callback URL: {e}")
-                    
 class BadmintonBookingViewSet(viewsets.ModelViewSet):
     queryset = Badminton_Booking.objects.all()
     serializer_class = BadmintonBookingSerializer
@@ -146,17 +123,19 @@ class BadmintonBookingViewSet(viewsets.ModelViewSet):
         transaction_id = str(uuid.uuid4())
         booking.transaction_id = transaction_id
         booking.save()
-
+        request.session['booking_id'] = booking.id
         # Retrieve customer details (e.g., from user profile or request)
         customer_name = request.user.phone_number or "John Doe"
         customer_email = request.user.email or "john.doe@example.com"
         customer_mobile = request.user.phone_number  
-
+        booking_id = request.session.get('booking_id') # Get mobile from request or use a default
+        print('booking_id',booking_id)
+        success_url = f'https://backend-turf.onrender.com/payment/success/{booking_id}/'
         # Initiating Aamarpay payment
         pay = aamarPay(
             isSandbox=True,  # Set to True for sandbox/testing mode
             storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
-            successUrl='https://backend-turf.onrender.com/payment/success/?transaction_id={transaction_id}',  # Replace with actual success URL
+            successUrl=success_url,   # Replace with actual success URL
             failUrl='https://backend-turf.onrender.com/payment/failure/',  # Replace with actual failure URL
             cancelUrl='https://backend-turf.onrender.com/payment/callback/',  # Replace with actual cancel URL
             transactionID=transaction_id,  # Unique transaction ID
@@ -211,17 +190,19 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
                 advance_payable=booking.advance_payable,
             )
         booking.save()
-
+        request.session['booking_id'] = booking.id
         # Retrieve customer details (e.g., from user profile or request)
         customer_name = request.user.phone_number or "John Doe"
         customer_email = request.user.email or "john.doe@example.com"
         customer_mobile = request.user.phone_number  # Get mobile from request or use a default
-
+        booking_id = request.session.get('booking_id') # Get mobile from request or use a default
+        print('booking_id',booking_id)
+        success_url = f'https://backend-turf.onrender.com/payment/success/{booking_id}/'
         # Initiating Aamarpay payment
         pay = aamarPay(
             isSandbox=True,  # Set to True for sandbox/testing mode
             storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
-            successUrl='https://backend-turf.onrender.com/payment/success/',  # Replace with actual success URL
+            successUrl=success_url,   # Replace with actual success URL
             failUrl='https://backend-turf.onrender.com/payment/failure/',  # Replace with actual failure URL
             cancelUrl='https://backend-turf.onrender.com/payment/callback/',
             transactionID=transaction_id,  # Unique transaction ID
@@ -250,53 +231,13 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
         logging.info(f"Payment URL: {payment_url}")
         return Response({'payment_url': payment_url,'transaction id':transaction_id}, status=status.HTTP_200_OK)
 
-@csrf_exempt
-def aamarpay_callback(request,transaction_id):
-    if not transaction_id:
-        logging.error("Missing transaction ID in callback.")
-        return HttpResponse("Missing transaction ID", status=status.HTTP_400_BAD_REQUEST)
 
-    booking = None
-    for booking_model in [Turf_Booking, Badminton_Booking, Swimming_Booking]:
-        try:
-            booking = booking_model.objects.get(transaction_id=transaction_id)
-            break 
-        except booking_model.DoesNotExist:
-            continue  
-    if not booking:
-        logging.error(f"Booking not found for transaction ID: {transaction_id}")
-        return HttpResponse("Invalid transaction ID", status=status.HTTP_400_BAD_REQUEST)
-
-    payment_status = request.GET.get('pay_status')
-
-    if payment_status == 'Successful':
-        booking.payment_status = 'successful'
-        if booking.total_amount == booking.advance_payable:
-            booking.is_paid_full = True
-        booking.save() 
-        logging.info(f"Payment successful for transaction ID: {transaction_id}")
-        return redirect('payment_success')  
-    else:
-        booking.payment_status = 'failed'
-        booking.save()
-        logging.warning(f"Payment failed for transaction ID: {transaction_id}")
-        return redirect('payment_failure')  
-        
+      
 @csrf_exempt
 def payment_success(request, booking_id):
-    # booking_id is passed in the URL parameter
     print(f"Booking ID from URL: {booking_id}")
-
-    session_booking_id = request.session.get('booking_id')
-    print(f"Booking ID from session: {session_booking_id}")
-
-    # Validate the booking_id
     if not booking_id:
-        if not session_booking_id:
-            return HttpResponse("Booking ID is required", status=400)
-        booking_id = session_booking_id
-
-    # Retrieve the booking from the database
+            return HttpResponse("Booking ID is required", status=400)  
     booking = None
     for model, model_name in [(Turf_Booking, 'turf'), (Badminton_Booking, 'badminton'), (Swimming_Booking, 'swimming')]:
         try:
@@ -308,18 +249,55 @@ def payment_success(request, booking_id):
     if not booking:
         return HttpResponse("Booking not found", status=400)
 
-    # Trigger the callback function for the booking
-    trigger_callback(booking)
+    transaction_id = booking.transaction_id
+    payment_status = 'Successful'
 
-    # Clean up session by removing the booking_id after it is used
-    if 'booking_id' in request.session:
-        del request.session['booking_id']
+    try:
+        print('Calling')
+        return aamarpay_callback(request, transaction_id, payment_status)
+         
+    except Exception as e:
+        logging.error(f"Error in calling Aamarpay callback: {str(e)}")
+        return HttpResponse("Error during callback processing", status=500)
 
-    return HttpResponse("Payment Successful")
+    # Optionally, clean up session data after the callback
+    
+@csrf_exempt
+def aamarpay_callback(request, transaction_id, payment_status):
+    
+    if not transaction_id:
+        return HttpResponse("Missing transaction ID", status=status.HTTP_400_BAD_REQUEST)
+
+    # Look up the booking based on the transaction ID
+    booking = None
+    for booking_model in [Turf_Booking, Badminton_Booking, Swimming_Booking]:
+        try:
+            booking = booking_model.objects.get(transaction_id=transaction_id)
+            print('booking', booking)
+            break 
+        except booking_model.DoesNotExist:
+            continue  
+    
+    if not booking:
+        return HttpResponse("Invalid transaction ID", status=status.HTTP_400_BAD_REQUEST)
+
+    # Handle payment status (either successful or failed)
+    if payment_status == 'Successful':
+        booking.payment_status = 'successful'
+        if booking.total_amount == booking.advance_payable:
+            booking.is_paid_full = True
+        booking.save() 
+        return HttpResponse('payment_success')  # Pass booking_id here
+    else:
+        # Handle payment failure
+        booking.payment_status = 'failed'
+        booking.save()
+        return redirect('payment_failure')
+    
 
 @csrf_exempt
 def payment_failure(request):
-    return HttpResponse("Payment Failled")
+    return HttpResponse('Payment Failed')
 
 
 
