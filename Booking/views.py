@@ -287,7 +287,8 @@ def payment_success(request):
 
 @csrf_exempt
 def payment_failure(request):
-    return aamarpay_callback(request)
+    transaction_id = request.GET.get('transaction_id')
+    return aamarpay_callback(request, transaction_id)
 
 
 
