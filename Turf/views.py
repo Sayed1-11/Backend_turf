@@ -68,7 +68,7 @@ class TurfViewSet(viewsets.ModelViewSet):
         booking = self.get_object()
         booking.update_status_based_on_time()
         print('calling')
-        callback_url = "https://127.0.0.1:8000/payment/callback/"
+        callback_url = "https://backend-turf.onrender.com/payment/callback/"
         params = {
             'mer_txnid': booking.transaction_id,
             'pay_status': 'Successful',  
