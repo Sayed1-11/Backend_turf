@@ -58,6 +58,7 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         transaction_id = str(uuid.uuid4())
         booking.transaction_id = transaction_id
         booking.save()
+        request.session['booking_id'] = booking.id
         customer_name = request.user.phone_number or "John Doe"
         customer_email = request.user.email or "john.doe@example.com"
         customer_mobile = request.user.phone_number  # Get mobile from request or use a default
@@ -300,6 +301,7 @@ def payment_success(request):
 
     # Trigger the callback function for the booking
     trigger_callback(booking)
+    del request.session['booking_id']
     return HttpResponse("Payment Successful")
 
 @csrf_exempt
