@@ -62,13 +62,15 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         customer_email = request.user.email or "john.doe@example.com"
         customer_mobile = request.user.phone_number  # Get mobile from request or use a default
 
-        # Initiating Aamarpay payment
+        success_url = f"https://backend-turf.onrender.com/payment/success/?transaction_id={transaction_id}"
+        fail_url = f"https://backend-turf.onrender.com/payment/failure/?transaction_id={transaction_id}"
+        cancel_url = "https://backend-turf.onrender.com/payment/callback/"
         pay = aamarPay(
             isSandbox=True,  # Set to True for sandbox/testing mode
             storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
-            successUrl=f"https://backend-turf.onrender.com/payment/success/?transaction_id={transaction_id}",  # Replace with actual success URL
-            failUrl=f"https://backend-turf.onrender.com/payment/failure/?transaction_id={transaction_id}",  # Replace with actual failure URL
-            cancelUrl='https://backend-turf.onrender.com/payment/callback/',  # Replace with actual cancel URL
+            successUrl=success_url,  
+            failUrl=fail_url,  
+            cancelUrl=cancel_url,   # Replace with actual cancel URL
             transactionID=transaction_id,  # Unique transaction ID
             transactionAmount=str(booking.advance_payable),  # Convert to string if required
             signature=settings.AAMARPAY_SIGNATURE_KEY,  # Your actual signature
