@@ -153,7 +153,7 @@ class BadmintonBookingViewSet(viewsets.ModelViewSet):
         pay = aamarPay(
             isSandbox=True,  # Set to True for sandbox/testing mode
             storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
-            successUrl='https://backend-turf.onrender.com/payment/success/',  # Replace with actual success URL
+            successUrl='https://backend-turf.onrender.com/payment/success/?transaction_id={transaction_id}',  # Replace with actual success URL
             failUrl='https://backend-turf.onrender.com/payment/failure/',  # Replace with actual failure URL
             cancelUrl='https://backend-turf.onrender.com/payment/callback/',  # Replace with actual cancel URL
             transactionID=transaction_id,  # Unique transaction ID
@@ -248,10 +248,7 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
         return Response({'payment_url': payment_url,'transaction id':transaction_id}, status=status.HTTP_200_OK)
 
 @csrf_exempt
-def aamarpay_callback(request):
-    logging.info(f"Callback request data: {request.GET}")
-    transaction_id = request.POST.get('mer_txnid')
-
+def aamarpay_callback(request,transaction_id):
     if not transaction_id:
         logging.error("Missing transaction ID in callback.")
         return HttpResponse("Missing transaction ID", status=status.HTTP_400_BAD_REQUEST)
@@ -280,11 +277,13 @@ def aamarpay_callback(request):
         booking.payment_status = 'failed'
         booking.save()
         logging.warning(f"Payment failed for transaction ID: {transaction_id}")
-        return redirect('payment_failure') 
+        return redirect('payment_failure')  
         
 @csrf_exempt
 def payment_success(request):
-    return aamarpay_callback(request)
+    transaction_id = request.GET.get('transaction_id')
+    return aamarpay_callback(request, transaction_id)
+
 
 @csrf_exempt
 def payment_failure(request):
