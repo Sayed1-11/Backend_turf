@@ -62,15 +62,13 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         customer_email = request.user.email or "john.doe@example.com"
         customer_mobile = request.user.phone_number  # Get mobile from request or use a default
 
-        success_url = f"https://backend-turf.onrender.com/payment/success/?transaction_id={transaction_id}"
-        fail_url = f"https://backend-turf.onrender.com/payment/failure/?transaction_id={transaction_id}"
-        cancel_url = "https://backend-turf.onrender.com/payment/callback/"
+        
         pay = aamarPay(
             isSandbox=True,  # Set to True for sandbox/testing mode
             storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
-            successUrl=success_url,  
-            failUrl=fail_url,  
-            cancelUrl=cancel_url,   # Replace with actual cancel URL
+            successUrl='https://backend-turf.onrender.com/payment/success/',  # Replace with actual success URL
+            failUrl='https://backend-turf.onrender.com/payment/failure/',  # Replace with actual failure URL
+            cancelUrl='https://backend-turf.onrender.com/payment/callback/',   # Replace with actual cancel URL
             transactionID=transaction_id,  # Unique transaction ID
             transactionAmount=str(booking.advance_payable),  # Convert to string if required
             signature=settings.AAMARPAY_SIGNATURE_KEY,  # Your actual signature
@@ -283,14 +281,30 @@ def aamarpay_callback(request,transaction_id):
         
 @csrf_exempt
 def payment_success(request):
-    transaction_id = request.GET.get('transaction_id')
-    return aamarpay_callback(request, transaction_id)
+    booking_id = request.POST.get('booking_id')
+    if not booking_id:
+        return HttpResponse("Booking ID is required", status=400)
 
+    booking = None
+
+    for model, model_name in [(Turf_Booking, 'turf'), (Badminton_Booking, 'badminton'), (Swimming_Booking, 'swimming')]:
+        try:
+            booking = model.objects.get(id=booking_id)
+            booking_type = model_name  # Set the booking type based on the model found
+            break
+        except model.DoesNotExist:
+            continue
+
+    if not booking:
+        return HttpResponse("Booking not found", status=400)
+
+    # Trigger the callback function for the booking
+    trigger_callback(booking)
+    return HttpResponse("Payment Successful")
 
 @csrf_exempt
 def payment_failure(request):
-    transaction_id = request.GET.get('transaction_id')
-    return aamarpay_callback(request, transaction_id)
+    return HttpResponse("Payment Failled")
 
 
 
