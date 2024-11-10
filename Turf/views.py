@@ -66,7 +66,7 @@ class TurfViewSet(viewsets.ModelViewSet):
     
     def retrieve(self, request, *args, **kwargs):
         booking = self.get_object()
-        booking.update_status_based_on_time()
+        booking.update_status_for_all()
         print('calling')
         callback_url = "https://backend-turf.onrender.com/payment/callback/"
         params = {
