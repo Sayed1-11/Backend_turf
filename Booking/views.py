@@ -283,25 +283,7 @@ def aamarpay_callback(request):
         return redirect('payment_failure')  
 @csrf_exempt
 def payment_success(request):
-    booking_id = request.POST.get('booking_id')
-    if not booking_id:
-        return HttpResponse("Booking ID is required", status=400)
-
-    booking = None
-
-    for model, model_name in [(Turf_Booking, 'turf'), (Badminton_Booking, 'badminton'), (Swimming_Booking, 'swimming')]:
-        try:
-            booking = model.objects.get(id=booking_id)
-            booking_type = model_name  # Set the booking type based on the model found
-            break
-        except model.DoesNotExist:
-            continue
-
-    if not booking:
-        return HttpResponse("Booking not found", status=400)
-
-    # Trigger the callback function for the booking
-    trigger_callback(booking)
+    aamarpay_callback()
     return HttpResponse("Payment Successful")
 
 @csrf_exempt
