@@ -281,7 +281,7 @@ def aamarpay_callback(request,transaction_id):
         
 @csrf_exempt
 def payment_success(request):
-    booking_id = request.POST.get('booking_id')
+    booking_id = request.session.get('booking_id')
     if not booking_id:
         return HttpResponse("Booking ID is required", status=400)
 
