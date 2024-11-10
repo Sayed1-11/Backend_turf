@@ -62,12 +62,14 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         customer_name = request.user.phone_number or "John Doe"
         customer_email = request.user.email or "john.doe@example.com"
         customer_mobile = request.user.phone_number  # Get mobile from request or use a default
-
+        booking_id = request.session.get('booking_id') # Get mobile from request or use a default
+        print('booking_id',booking_id)
+        success_url = f'http://127.0.0.1:8000/payment/success/{booking_id}/'
         
         pay = aamarPay(
             isSandbox=True,  # Set to True for sandbox/testing mode
             storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
-            successUrl='https://backend-turf.onrender.com/payment/success/',  # Replace with actual success URL
+            successUrl=success_url,  # Replace with actual success URL
             failUrl='https://backend-turf.onrender.com/payment/failure/',  # Replace with actual failure URL
             cancelUrl='https://backend-turf.onrender.com/payment/callback/',   # Replace with actual cancel URL
             transactionID=transaction_id,  # Unique transaction ID
@@ -281,17 +283,24 @@ def aamarpay_callback(request,transaction_id):
         return redirect('payment_failure')  
         
 @csrf_exempt
-def payment_success(request):
-    booking_id = request.session.get('booking_id')
+def payment_success(request, booking_id):
+    # booking_id is passed in the URL parameter
+    print(f"Booking ID from URL: {booking_id}")
+
+    session_booking_id = request.session.get('booking_id')
+    print(f"Booking ID from session: {session_booking_id}")
+
+    # Validate the booking_id
     if not booking_id:
-        return HttpResponse("Booking ID is required", status=400)
+        if not session_booking_id:
+            return HttpResponse("Booking ID is required", status=400)
+        booking_id = session_booking_id
 
+    # Retrieve the booking from the database
     booking = None
-
     for model, model_name in [(Turf_Booking, 'turf'), (Badminton_Booking, 'badminton'), (Swimming_Booking, 'swimming')]:
         try:
             booking = model.objects.get(id=booking_id)
-            booking_type = model_name  # Set the booking type based on the model found
             break
         except model.DoesNotExist:
             continue
@@ -301,7 +310,11 @@ def payment_success(request):
 
     # Trigger the callback function for the booking
     trigger_callback(booking)
-    del request.session['booking_id']
+
+    # Clean up session by removing the booking_id after it is used
+    if 'booking_id' in request.session:
+        del request.session['booking_id']
+
     return HttpResponse("Payment Successful")
 
 @csrf_exempt
