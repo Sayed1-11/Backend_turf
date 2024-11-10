@@ -280,15 +280,15 @@ def aamarpay_callback(request):
         booking.payment_status = 'failed'
         booking.save()
         logging.warning(f"Payment failed for transaction ID: {transaction_id}")
-        return redirect('payment_failure')  
+        return redirect('payment_failure') 
+        
 @csrf_exempt
 def payment_success(request):
-    aamarpay_callback()
-    return HttpResponse("Payment Successful")
+    return aamarpay_callback(request)
 
 @csrf_exempt
 def payment_failure(request):
-    return HttpResponse("Payment Failed")
+    return aamarpay_callback(request)
 
 
 
