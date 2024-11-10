@@ -76,7 +76,7 @@ class TurfViewSet(viewsets.ModelViewSet):
 
         # Make the HTTP GET request to the callback URL
         try:
-            response = requests.get(callback_url, params=params)
+            response = requests.post(callback_url, params=params)
             if response.status_code == 200:
                 # Successfully called the callback
                 print(f"Successfully triggered callback for transaction ID: {booking.transaction_id}")
