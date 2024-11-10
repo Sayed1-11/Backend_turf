@@ -56,7 +56,7 @@ urlpatterns = [
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path('field-types/', FieldTypeChoicesView.as_view(), name='field-types'),
     path('payment/callback/', aamarpay_callback, name='aamarpay_callback'),
-    path('payment/success/', payment_success, name='payment_success'),
+    path('payment/success/<int:booking_id>/', payment_success, name='payment_success'),
     path('payment/failure/', payment_failure, name='payment_failure'),
     
 ]
