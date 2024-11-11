@@ -93,6 +93,10 @@ class SwimmingSlotSerializer(serializers.ModelSerializer):
         return attrs
     
 class SlotHistorySerializer(serializers.ModelSerializer):
+    turf_slot = TurfSlotSerializer(read_only=True)
+    badminton_slot = BadmintonSlotSerializer(read_only=True)
+    swimming_slot = SwimmingSlotSerializer(read_only=True)
+    
     class Meta:
         model = SlotHistory
-        fields = ['id', 'user', 'turf_slot', 'booking_date','badminton_slot','swimming_slot', 'total_price','turf']
+        fields = ['id', 'user', 'turf_slot', 'badminton_slot', 'swimming_slot', 'booking_date', 'total_price', 'turf']
