@@ -183,6 +183,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "https://trusted.cdn.com")
+CSP_STYLE_SRC = ("'self'", "https://trusted.cdn.com")
+CSP_IMG_SRC = ("'self'", "data:")
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
