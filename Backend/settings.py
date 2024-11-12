@@ -29,7 +29,7 @@ AAMARPAY_SIGNATURE_KEY = 'dbb74894e82415a2f7ff0ec3a97e4183'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
+SECURE_SSL_REDIRECT = True
 MAX_OTP_TRY = 3
 AUTH_USER_MODEL = "User.UserModel"
 MIN_PASSWORD_LENGTH = 8
@@ -39,7 +39,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5500',
 ]
 CORS_ALLOW_ALL_ORIGINS = True
-
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = [
     'daphne',
     'channels',
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'sslserver',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'django_filters',
@@ -98,7 +99,8 @@ import os
 
 SMS_API_KEY='Xg2IWOgm0Pz5S8bltuUJ'
 
-
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
