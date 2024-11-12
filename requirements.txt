@@ -58,4 +58,3 @@ tzdata==2024.1
 zope.interface==7.0.3
 usaddress==0.5.11
 django-sslserver
-django-csp
