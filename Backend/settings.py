@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-n8p%0av@%y-c-$d@nia^96*=f0_#c@a=!ko&=un5pfq3ve7n)q
 AAMARPAY_STORE_ID = 'aamarpaytest'
 AAMARPAY_SIGNATURE_KEY = 'dbb74894e82415a2f7ff0ec3a97e4183'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 SECURE_SSL_REDIRECT = True
