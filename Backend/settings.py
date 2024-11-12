@@ -139,7 +139,9 @@ CACHES = {
         "LOCATION": "127.0.0.1:11211",
     }
 }
-
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
 LOGGING = {
     'version': 1,
