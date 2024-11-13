@@ -169,12 +169,6 @@ class SwimmingSlot(models.Model):
     def calculate_price(self):
         total_price = self.total_price()
 
-        if self.coupon:
-            if hasattr(self.coupon, 'discount_percentage') and self.coupon.discount_percentage:
-                total_price -= total_price * (self.coupon.discount_percentage / 100)
-            elif hasattr(self.coupon, 'discount_amount') and self.coupon.discount_amount:
-                total_price -= self.coupon.discount_amount
-
         return total_price
     def __str__(self):
         return f"{self.turf.name} ({self.field.field_type}) - {self.date} in {self.session}"
