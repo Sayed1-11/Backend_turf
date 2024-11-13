@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 class CouponViewSet(viewsets.ModelViewSet):
     queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]  # Only admins can modify coupons
+    permission_classes = [IsAuthenticated]  
     filter_backends = [filters.OrderingFilter, filters.SearchFilter]
     search_fields = ['name', 'code', 'description']
     ordering_fields = ['name', 'discount_amount', 'is_active']
