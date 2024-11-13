@@ -21,11 +21,11 @@ from django.urls import path,include
 from rest_framework.routers import DefaultRouter
 from User.views import UserViewset,UserProfileUpdateViewset,AdminUserSignupViewSet
 from rest_framework.authtoken.views import obtain_auth_token
-from Turf.views import TurfViewSet,SportsViewSet,TimeSlotViewSet,PriceViewSet,SportFieldViewSet,FacilitiesViewSet,TimeSlotEligibilityViewSet,FieldTypeChoicesView,ReviewViewSet,ReviewViewSet_perosn
+from Turf.views import TurfViewSet,SportsViewSet,TimeSlotViewSet,PriceViewSet,SportFieldViewSet,FacilitiesViewSet,TimeSlotEligibilityViewSet,FieldTypeChoicesView,ReviewViewSet,ReviewViewSet_perosn,FavoriteViewSet
 from Slot.views import BadmintonSlotViewSet,TurfSlotViewSet,SwimmingSessionViewSet,SwimmingSlotViewSet,SlotHistoryViewSet
 from Booking.views import TurfBookingViewSet, BadmintonBookingViewSet, SwimmingBookingViewSet,Booking_history
 from Booking.views import aamarpay_callback, payment_success, payment_failure,MyBookingsViewSet
-
+from Offers.views import CouponViewSet
 router = DefaultRouter()
 router.register(r"user",UserViewset,basename="user")
 router.register(r"user-update",UserProfileUpdateViewset,basename="update")
@@ -49,6 +49,8 @@ router.register(r'TurfSlot', TurfSlotViewSet)
 router.register(r'Swimming_sessions', SwimmingSessionViewSet)
 router.register(r'Swimming', SwimmingSlotViewSet)
 router.register(r'Badminton_slot', BadmintonSlotViewSet)
+router.register(r'favorites', FavoriteViewSet)
+router.register(r'Offers', CouponViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
