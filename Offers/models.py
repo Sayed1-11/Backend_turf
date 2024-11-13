@@ -1,5 +1,5 @@
 from django.db import models
-from Slot.models import TurfSlot,BadmintonSlot,SwimmingSlot
+
 
 class Coupon(models.Model):
     ISSUER_CHOICES = (
@@ -21,24 +21,3 @@ class Coupon(models.Model):
     def __str__(self):
         return self.code
 
-
-class TurfCouponApply(models.Model):
-    offer = models.ForeignKey(Coupon, on_delete=models.CASCADE)
-    slot = models.ForeignKey(TurfSlot, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"Coupon {self.coupon.code} applied to Turf Slot {self.slot}"
-
-class BadmintonCouponApply(models.Model):
-    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
-    slot = models.ForeignKey(BadmintonSlot, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"Coupon {self.coupon.code} applied to Badminton Slot {self.slot}"
-
-class SwimmingCouponApply(models.Model):
-    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
-    slot = models.ForeignKey(SwimmingSlot, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"Coupon {self.coupon.code} applied to Swimming Slot {self.slot}"
