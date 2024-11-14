@@ -42,13 +42,24 @@ class Turf_Booking(BaseBooking):
     turf_slot = models.ForeignKey(TurfSlot, on_delete=models.CASCADE)
     advance_payable = models.DecimalField(max_digits=10, decimal_places=2, default=500.0)
     def save(self, *args, **kwargs):
-        self.total_amount = self.turf_slot.calculate_price()
+        # Check if the turf_slot has a discounted price
+        if hasattr(self.turf_slot, 'discounted_price') and self.turf_slot.discounted_price:
+            self.total_amount = self.turf_slot.discounted_price
+        else:
+            self.total_amount = self.turf_slot.calculate_price()
+        
+        # Calculate the due amount
         self.due_amount = self.total_amount - self.advance_payable
+        
+        # Generate order_id if not already present
         if not self.order_id:
             current_year = datetime.now().year + self.turf_slot.turf.id
             booking_count = Turf_Booking.objects.count() + 1
             self.order_id = f"{self.turf_slot.id}{current_year}{booking_count}"
+        
+        # Call the parent class's save method
         super().save(*args, **kwargs)
+
     @classmethod
     def update_status_for_all(cls):
         current_time = timezone.now()
@@ -69,13 +80,24 @@ class Badminton_Booking(BaseBooking):
     badminton_slot = models.ForeignKey(BadmintonSlot, on_delete=models.CASCADE)
     advance_payable = models.DecimalField(max_digits=10, decimal_places=2, default=300.0)
     def save(self, *args, **kwargs):
-        self.total_amount = self.badminton_slot.calculate_price()
+        # Check if the turf_slot has a discounted price
+        if hasattr(self.badminton_slot, 'discounted_price') and self.badminton_slot.discounted_price:
+            self.total_amount = self.badminton_slot.discounted_price
+        else:
+            self.total_amount = self.badminton_slot.calculate_price()
+        
+        # Calculate the due amount
         self.due_amount = self.total_amount - self.advance_payable
+        
+        # Generate order_id if not already present
         if not self.order_id:
             current_year = datetime.now().year + self.badminton_slot.turf.id
             booking_count = Badminton_Booking.objects.count() + 1
             self.order_id = f"{self.badminton_slot.id}{current_year}{booking_count}"
+        
+        # Call the parent class's save method
         super().save(*args, **kwargs)
+
 
     @classmethod
     def update_status_for_all(cls):
@@ -100,12 +122,22 @@ class Swimming_Booking(BaseBooking):
     swimming_slot = models.ForeignKey(SwimmingSlot, on_delete=models.CASCADE)
     advance_payable = models.DecimalField(max_digits=10, decimal_places=2, default=300.0)
     def save(self, *args, **kwargs):
-        self.total_amount = self.swimming_slot.calculate_price()
+        # Check if the turf_slot has a discounted price
+        if hasattr(self.swimming_slot, 'discounted_price') and self.swimming_slot.discounted_price:
+            self.total_amount = self.swimming_slot.discounted_price
+        else:
+            self.total_amount = self.swimming_slot.calculate_price()
+        
+        # Calculate the due amount
         self.due_amount = self.total_amount - self.advance_payable
+        
+        # Generate order_id if not already present
         if not self.order_id:
             current_year = datetime.now().year + self.swimming_slot.turf.id
             booking_count = Swimming_Booking.objects.count() + 1
             self.order_id = f"{self.swimming_slot.id}{current_year}{booking_count}"
+        
+        # Call the parent class's save method
         super().save(*args, **kwargs)
     @classmethod
     def update_status_for_all(cls):
