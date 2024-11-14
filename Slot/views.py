@@ -159,11 +159,11 @@ class BadmintonSlotViewSet(viewsets.ModelViewSet):
         slot_instance = serializer.save()
 
         try:
-            coupon = Coupon.objects.get(code=coupon_code, is_active=True)
-            print(f"Coupon found: {coupon.code}")  # Debugging line
-        except Coupon.DoesNotExist:
-            print("Coupon not found")  # Debugging line
-            return Response({'error': 'Invalid or inactive coupon code.'}, status=status.HTTP_400_BAD_REQUEST)
+            # Get the correct total price (check if coupon has been applied)
+            if hasattr(slot_instance, 'discounted_price') and slot_instance.discounted_price:
+                total_price = slot_instance.discounted_price
+            else:
+                total_price = slot_instance.calculate_price()
             SlotHistory.objects.create(
                 user=request.user,
                 badminton_slot=slot_instance,
@@ -258,11 +258,11 @@ class SwimmingSlotViewSet(viewsets.ModelViewSet):
         slot_instance = serializer.save()
 
         try:
-            coupon = Coupon.objects.get(code=coupon_code, is_active=True)
-            print(f"Coupon found: {coupon.code}")  # Debugging line
-        except Coupon.DoesNotExist:
-            print("Coupon not found")  # Debugging line
-            return Response({'error': 'Invalid or inactive coupon code.'}, status=status.HTTP_400_BAD_REQUEST)
+            # Get the correct total price (check if coupon has been applied)
+            if hasattr(slot_instance, 'discounted_price') and slot_instance.discounted_price:
+                total_price = slot_instance.discounted_price
+            else:
+                total_price = slot_instance.calculate_price()
             SlotHistory.objects.create(
                 user=request.user,
                 swimming_slot=slot_instance,
