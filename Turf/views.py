@@ -15,10 +15,10 @@ from django.db.models.functions import Cast
 from math import radians, cos, sin, acos
 from decimal import Decimal
 
+
 class TurfViewSet(viewsets.ModelViewSet):
     queryset = Turf.objects.all()
     serializer_class = TurfSerializer
- 
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['sports','location','name']
     def get_queryset(self):
@@ -51,10 +51,10 @@ class TurfViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         
         if user_latitude is not None and user_longitude is not None:
-            for turf in queryset:
-                turf.distance = self.calculate_distance(user_latitude, user_longitude, turf)
-            
-            queryset = sorted(queryset, key=lambda x: x.distance)
+            # Annotate the queryset with distance to the user
+            queryset = queryset.annotate(
+                distance=self.calculate_distance(user_latitude, user_longitude)
+            ).order_by('distance')
 
         Turf_Booking.update_status_for_all()
         Badminton_Booking.update_status_for_all()
@@ -127,19 +127,18 @@ class TurfViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(f"Error fetching coordinates: {e}")
             return None, None
-    def calculate_distance(self, user_latitude, user_longitude, obj):
-       
-        turf_latitude = obj.latitude  
-        turf_longitude = obj.longitude  
-        distance = 6371 * acos(
-            cos(radians(user_latitude)) *
-            cos(radians(turf_latitude)) *
-            cos(radians(turf_longitude) - radians(user_longitude)) +
-            sin(radians(user_latitude)) *
-            sin(radians(turf_latitude))
+    def calculate_distance(self, user_latitude, user_longitude):
+        return Cast(
+            (
+                6371 * math.acos(
+                    math.cos(math.radians(user_latitude)) *
+                    math.cos(math.radians(F('latitude'))) *
+                    math.cos(math.radians(F('longitude')) - math.radians(user_longitude)) +
+                    math.sin(math.radians(user_latitude)) *
+                    math.sin(math.radians(F('latitude')))
+                )
+            ), FloatField()
         )
-        
-        return distance
 class SportsViewSet(viewsets.ModelViewSet):
     queryset = Sports.objects.all()
     serializer_class = SportsSerializer
