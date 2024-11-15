@@ -48,15 +48,21 @@ class TurfViewSet(viewsets.ModelViewSet):
         user = request.user
         user_latitude = user.latitude  
         user_longitude = user.longitude  
+        # Ensure that the user has valid latitude and longitude
+        if user_latitude is None or user_longitude is None:
+            return Response({"error": "User's location is not available."}, status=status.HTTP_400_BAD_REQUEST)
+    
         queryset = self.get_queryset()
-        
-        if user_latitude is not None and user_longitude is not None:
-            # Compute the distance for each turf and add it as a field
-            for turf in queryset:
+    
+        # Calculate the distance only if the turf has valid latitude and longitude
+        for turf in queryset:
+            if turf.latitude is not None and turf.longitude is not None:
                 turf.distance = self.calculate_distance(user_latitude, user_longitude, turf.latitude, turf.longitude)
-            
-            # Order by distance
-            queryset = sorted(queryset, key=lambda x: x.distance)
+            else:
+                turf.distance = None  # or set a default value like 0 or an error message
+    
+        # Sort the queryset by distance, skipping turfs without a valid distance
+        queryset = sorted(queryset, key=lambda x: x.distance if x.distance is not None else float('inf'))
 
         Turf_Booking.update_status_for_all()
         Badminton_Booking.update_status_for_all()
