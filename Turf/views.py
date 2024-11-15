@@ -50,10 +50,10 @@ class TurfViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         
         if user_latitude is not None and user_longitude is not None:
-            # Annotate the queryset with distance to the user
-            queryset = queryset.annotate(
-                distance=self.calculate_distance(user_latitude, user_longitude)
-            ).order_by('distance')
+            for turf in queryset:
+                turf.distance = self.calculate_distance(user_latitude, user_longitude, turf)
+            
+            queryset = sorted(queryset, key=lambda x: x.distance)
 
         Turf_Booking.update_status_for_all()
         Badminton_Booking.update_status_for_all()
