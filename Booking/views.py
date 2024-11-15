@@ -63,28 +63,28 @@ class TurfBookingViewSet(viewsets.ModelViewSet):
         customer_name = request.user.phone_number or "John Doe"
         customer_email = request.user.email or "john.doe@example.com"
         customer_mobile = request.user.phone_number 
-        booking_id = request.session.get('booking_id') # Get mobile from request or use a default
+        booking_id = request.session.get('booking_id') 
         print('booking_id',booking_id)
         success_url = f'https://backend-turf.onrender.com/payment/success/{booking_id}/'
 
         pay = aamarPay(
-            isSandbox=True,  # Set to True for sandbox/testing mode
-            storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
-            successUrl=success_url,  # Replace with actual success URL
-            failUrl='https://backend-turf.onrender.com/payment/failure/',  # Replace with actual failure URL
-            cancelUrl='https://backend-turf.onrender.com/payment/callback/',  # Replace with actual cancel URL
-            transactionID=transaction_id,  # Unique transaction ID
-            transactionAmount=str(booking.advance_payable),  # Convert to string if required
-            signature=settings.AAMARPAY_SIGNATURE_KEY,  # Your actual signature
-            description='Booking for turf slot',  # Transaction description
-            customerName=customer_name,  # Set actual customer name
-            customerEmail=customer_email,  # Set actual customer email
+            isSandbox=True,  
+            storeID=settings.AAMARPAY_STORE_ID, 
+            successUrl=success_url, 
+            failUrl='https://backend-turf.onrender.com/payment/failure/', 
+            cancelUrl='https://backend-turf.onrender.com/payment/callback/', 
+            transactionID=transaction_id, 
+            transactionAmount=str(booking.advance_payable),
+            signature=settings.AAMARPAY_SIGNATURE_KEY,  
+            description='Booking for turf slot', 
+            customerName=customer_name,  
+            customerEmail=customer_email, 
             customerMobile=customer_mobile,  
-            customerAddress1=request.user.address or '123 Street Name',  # Use user profile or default
-            customerAddress2=request.user.address or 'Apt 4B',  # Use user profile or default
-            customerCity= 'City Name',  # Use user profile or default
-            customerState='State Name',  # Use user profile or default
-            customerPostCode='12345'  # Use user profile or default
+            customerAddress1=request.user.address or '123 Street Name', 
+            customerAddress2=request.user.address or 'Apt 4B', 
+            customerCity= 'City Name', 
+            customerState='State Name', 
+            customerPostCode='12345' 
         )
         payment_url = pay.payment()
         if not payment_url:
@@ -109,8 +109,6 @@ class BadmintonBookingViewSet(viewsets.ModelViewSet):
         serializer.validated_data['badminton_slot_id'] = badminton_slot
         booking = serializer.save(user=request.user)
         
-
-        # Update turf_slot status
         booking.badminton_slot.is_booked = True
         booking.badminton_slot.is_available = False
         Booking_History.objects.create(
@@ -125,40 +123,36 @@ class BadmintonBookingViewSet(viewsets.ModelViewSet):
         booking.transaction_id = transaction_id
         booking.save()
         request.session['booking_id'] = booking.id
-        # Retrieve customer details (e.g., from user profile or request)
         customer_name = request.user.phone_number or "John Doe"
         customer_email = request.user.email or "john.doe@example.com"
         customer_mobile = request.user.phone_number  
-        booking_id = request.session.get('booking_id') # Get mobile from request or use a default
+        booking_id = request.session.get('booking_id') 
         print('booking_id',booking_id)
         success_url = f'https://backend-turf.onrender.com/payment/success/{booking_id}/'
         # Initiating Aamarpay payment
         pay = aamarPay(
-            isSandbox=True,  # Set to True for sandbox/testing mode
-            storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
-            successUrl=success_url,   # Replace with actual success URL
-            failUrl='https://backend-turf.onrender.com/payment/failure/',  # Replace with actual failure URL
-            cancelUrl='https://backend-turf.onrender.com/payment/callback/',  # Replace with actual cancel URL
-            transactionID=transaction_id,  # Unique transaction ID
-            transactionAmount=str(booking.advance_payable),  # Convert to string if required
-            signature=settings.AAMARPAY_SIGNATURE_KEY,  # Your actual signature
-            description='Booking for turf slot',  # Transaction description
-            customerName=customer_name,  # Set actual customer name
-            customerEmail=customer_email,  # Set actual customer email
+            isSandbox=True,  
+            storeID=settings.AAMARPAY_STORE_ID,  
+            successUrl=success_url,  
+            failUrl='https://backend-turf.onrender.com/payment/failure/', 
+            cancelUrl='https://backend-turf.onrender.com/payment/callback/',  
+            transactionID=transaction_id, 
+            transactionAmount=str(booking.advance_payable),  
+            signature=settings.AAMARPAY_SIGNATURE_KEY,
+            description='Booking for turf slot', 
+            customerName=customer_name,  
+            customerEmail=customer_email,  
             customerMobile=customer_mobile,  
-            customerAddress1=request.user.address or '123 Street Name',  # Use user profile or default
-            customerAddress2=request.user.address or 'Apt 4B',  # Use user profile or default
-            customerCity= 'City Name',  # Use user profile or default
-            customerState='State Name',  # Use user profile or default
-            customerPostCode='12345'  # Use user profile or default
+            customerAddress1=request.user.address or '123 Street Name', 
+            customerAddress2=request.user.address or 'Apt 4B', 
+            customerCity= 'City Name', 
+            customerState='State Name', 
+            customerPostCode='12345' 
         )
 
-        # Get payment URL
         payment_url = pay.payment()
-
-        # Handle payment initiation failure
         if not payment_url:
-            booking.delete()  # Optionally delete the booking if payment initiation fails
+            booking.delete()
             return Response({'error': 'Payment initiation failed.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({'payment_url': payment_url,'transaction id':transaction_id}, status=status.HTTP_200_OK)
 
@@ -170,7 +164,6 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
     filterset_fields = ['user', 'swimming_slot']
 
     def create(self, request, *args, **kwargs):
-        # Initialize serializer with request data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -192,26 +185,25 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
             )
         booking.save()
         request.session['booking_id'] = booking.id
-        # Retrieve customer details (e.g., from user profile or request)
         customer_name = request.user.phone_number or "John Doe"
         customer_email = request.user.email or "john.doe@example.com"
-        customer_mobile = request.user.phone_number  # Get mobile from request or use a default
-        booking_id = request.session.get('booking_id') # Get mobile from request or use a default
+        customer_mobile = request.user.phone_number  
+        booking_id = request.session.get('booking_id') 
         print('booking_id',booking_id)
         success_url = f'https://backend-turf.onrender.com/payment/success/{booking_id}/'
         # Initiating Aamarpay payment
         pay = aamarPay(
-            isSandbox=True,  # Set to True for sandbox/testing mode
-            storeID=settings.AAMARPAY_STORE_ID,  # Your actual store ID
-            successUrl=success_url,   # Replace with actual success URL
-            failUrl='https://backend-turf.onrender.com/payment/failure/',  # Replace with actual failure URL
+            isSandbox=True,  
+            storeID=settings.AAMARPAY_STORE_ID,  
+            successUrl=success_url,  
+            failUrl='https://backend-turf.onrender.com/payment/failure/', 
             cancelUrl='https://backend-turf.onrender.com/payment/callback/',
-            transactionID=transaction_id,  # Unique transaction ID
-            transactionAmount=str(booking.advance_payable),  # Convert to string if required
-            signature=settings.AAMARPAY_SIGNATURE_KEY,  # Your actual signature
-            description='Booking for Swimming slot',  # Transaction description
-            customerName=customer_name,  # Set actual customer name
-            customerEmail=customer_email,  # Set actual customer email
+            transactionID=transaction_id,  
+            transactionAmount=str(booking.advance_payable),  
+            signature=settings.AAMARPAY_SIGNATURE_KEY,  
+            description='Booking for Swimming slot', 
+            customerName=customer_name, 
+            customerEmail=customer_email, 
             customerMobile=customer_mobile,  
             customerAddress1=request.user.address or '123 Street Name',  
             customerAddress2=request.user.address or 'Apt 4B', 
@@ -226,7 +218,7 @@ class SwimmingBookingViewSet(viewsets.ModelViewSet):
         # Handle payment initiation failure
         if not payment_url:
             logging.error("Payment URL not found during payment initiation.")
-            booking.delete()  # Optionally delete the booking if payment initiation fails
+            booking.delete()  
             return Response({'error': 'Payment initiation failed.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         logging.info(f"Payment URL: {payment_url}")
@@ -336,12 +328,10 @@ class MyBookingsViewSet(viewsets.ModelViewSet):
         badminton_bookings = Badminton_Booking.objects.filter(user=user).order_by('-created_at')
         swimming_bookings = Swimming_Booking.objects.filter(user=user).order_by('-created_at')
 
-        # Serializing each booking type
         turf_serializer = TurfBookingSerializer(turf_bookings, many=True, context={'request': request})
         badminton_serializer = BadmintonBookingSerializer(badminton_bookings, many=True, context={'request': request})
         swimming_serializer = SwimmingBookingSerializer(swimming_bookings, many=True, context={'request': request})
 
-        # Returning the response with all booking data
         return Response({
             'turf_bookings': turf_serializer.data,
             'badminton_bookings': badminton_serializer.data,
