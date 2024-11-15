@@ -12,8 +12,7 @@ class TurfBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Turf_Booking
         fields = [
-            'id', 'user', 'turf', 'turf_slot','turf_slot_id', 
-            'coupon', 'discount', 'total_amount', 
+            'id', 'user', 'turf', 'turf_slot','turf_slot_id', 'discount', 'total_amount', 
             'advance_payable', 'due_amount', 'is_paid_full', 'status', 'created_at', 'order_id', 'transaction_id', 'payment_status'
         ]
         read_only_fields = ['total_amount', 'order_id', 'status', 'created_at', 'discount', 'due_amount', 'transaction_id', 'payment_status']
@@ -74,8 +73,7 @@ class BadmintonBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Badminton_Booking
         fields = [
-            'id', 'user','turf','badminton_slot', 'badminton_slot_id',
-            'coupon', 'discount', 'total_amount', 
+            'id', 'user','turf','badminton_slot', 'badminton_slot_id', 'discount', 'total_amount', 
             'advance_payable', 'due_amount', 'is_paid_full', 'status','created_at','order_id','transaction_id','payment_status'
         ]
         read_only_fields = ['total_amount','order_id', 'status','created_at', 'discount', 'due_amount','transaction_id','payment_status'] 
@@ -135,7 +133,7 @@ class SwimmingBookingSerializer(serializers.ModelSerializer):
         model = Swimming_Booking
         fields = [
             'id', 'user', 'turf','swimming_slot', 'swimming_session','swimming_slot_id',
-            'coupon', 'discount', 'total_amount', 
+            'discount', 'total_amount', 
            'due_amount', 'is_paid_full', 'status','created_at','advance_payable','order_id','transaction_id','payment_status'
         ]
         read_only_fields = ['total_amount','order_id', 'discount', 'total_amount', 
@@ -179,7 +177,6 @@ class SwimmingBookingSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        # Extract turf_slot_id from validated data
         swimming_slot_id = validated_data.pop('swimming_slot_id')
 
         try:
