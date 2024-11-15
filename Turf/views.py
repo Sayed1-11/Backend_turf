@@ -12,6 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 import math,requests
 from django.db.models import Q,F, FloatField
 from django.db.models.functions import Cast
+from math import radians, cos, sin, acos
 from decimal import Decimal
 
 class TurfViewSet(viewsets.ModelViewSet):
