@@ -219,12 +219,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['user', 'turf'] 
+    filterset_fields = ['turf'] 
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        if self.action == 'list' and self.request.user.is_authenticated:
-            return self.queryset.filter(user=self.request.user)
+        queryset = self.queryset
+        turf_id = self.request.query_params.get('turf', None)
+        if turf_id is not None:
+            queryset = queryset.filter(turf_id=turf_id)
         return super().get_queryset()
 
     def perform_create(self, serializer):
