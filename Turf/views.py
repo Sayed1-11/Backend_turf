@@ -51,10 +51,12 @@ class TurfViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         
         if user_latitude is not None and user_longitude is not None:
-            # Annotate the queryset with distance to the user
-            queryset = queryset.annotate(
-                distance=self.calculate_distance(user_latitude, user_longitude)
-            ).order_by('distance')
+            # Compute the distance for each turf and add it as a field
+            for turf in queryset:
+                turf.distance = self.calculate_distance(user_latitude, user_longitude, turf.latitude, turf.longitude)
+            
+            # Order by distance
+            queryset = sorted(queryset, key=lambda x: x.distance)
 
         Turf_Booking.update_status_for_all()
         Badminton_Booking.update_status_for_all()
@@ -127,18 +129,24 @@ class TurfViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(f"Error fetching coordinates: {e}")
             return None, None
-    def calculate_distance(self, user_latitude, user_longitude):
-        return Cast(
-            (
-                6371 * math.acos(
-                    math.cos(math.radians(user_latitude)) *
-                    math.cos(math.radians(F('latitude'))) *
-                    math.cos(math.radians(F('longitude')) - math.radians(user_longitude)) +
-                    math.sin(math.radians(user_latitude)) *
-                    math.sin(math.radians(F('latitude')))
-                )
-            ), FloatField()
-        )
+    def calculate_distance(self, user_latitude, user_longitude, turf_latitude, turf_longitude):
+        # Use the Haversine formula to calculate the distance
+        # Radius of the Earth in km
+        R = 6371  
+        lat1 = radians(user_latitude)
+        lon1 = radians(user_longitude)
+        lat2 = radians(turf_latitude)
+        lon2 = radians(turf_longitude)
+
+        # Haversine formula
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+        c = 2 * acos(min(1, (cos(lat1) * cos(lat2) + sin(lat1) * sin(lat2))))
+        
+        # Calculate the distance
+        distance = R * c
+        return distance
 class SportsViewSet(viewsets.ModelViewSet):
     queryset = Sports.objects.all()
     serializer_class = SportsSerializer
