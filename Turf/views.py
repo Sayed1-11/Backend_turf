@@ -48,10 +48,6 @@ class TurfViewSet(viewsets.ModelViewSet):
         user = request.user
         user_latitude = user.latitude  
         user_longitude = user.longitude  
-        # Ensure that the user has valid latitude and longitude
-        if user_latitude is None or user_longitude is None:
-            return Response({"error": "User's location is not available."}, status=status.HTTP_400_BAD_REQUEST)
-    
         queryset = self.get_queryset()
     
         # Calculate the distance only if the turf has valid latitude and longitude
