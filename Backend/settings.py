@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'User',
     'Group',
     'Slot',
+    'Blog',
 ]
 
 MIDDLEWARE = [
