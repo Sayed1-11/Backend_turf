@@ -26,6 +26,7 @@ from Slot.views import BadmintonSlotViewSet,TurfSlotViewSet,SwimmingSessionViewS
 from Booking.views import TurfBookingViewSet, BadmintonBookingViewSet, SwimmingBookingViewSet,Booking_history
 from Booking.views import aamarpay_callback, payment_success, payment_failure,MyBookingsViewSet
 from Offers.views import CouponViewSet
+from Blog.views import BlogPostViewSet, TagViewSet, LikeViewSet
 router = DefaultRouter()
 router.register(r"user",UserViewset,basename="user")
 router.register(r"user-update",UserProfileUpdateViewset,basename="update")
@@ -51,6 +52,9 @@ router.register(r'Swimming', SwimmingSlotViewSet)
 router.register(r'Badminton_slot', BadmintonSlotViewSet)
 router.register(r'favorites', FavoriteViewSet)
 router.register(r'Offers', CouponViewSet)
+router.register(r'tags', TagViewSet, basename='tag')
+router.register(r'blog-posts', BlogPostViewSet, basename='blogpost')
+router.register(r'likes', LikeViewSet, basename='like')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
