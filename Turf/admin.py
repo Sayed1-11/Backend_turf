@@ -18,14 +18,10 @@ class SlotEligibilityInline(admin.TabularInline):
     fields = ['time_slot', 'is_available', 'reason']
     
 
-class PriceEligibilityInline(admin.TabularInline):
-    model = Price
-    extra = 1
-    fields = ['field','time_slot', 'price_per_hour','duration_hours','days_of_week']
 
 @admin.register(Turf)
 class TurfAdmin(admin.ModelAdmin):
-    inlines = [SportFieldInline, SlotEligibilityInline,PriceEligibilityInline]
+    inlines = [SportFieldInline, SlotEligibilityInline]
     list_display = ['name', 'location', 'rating']  
     search_fields = ['name', 'location'] 
 admin.site.register(TimeSlot)
