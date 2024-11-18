@@ -10,11 +10,10 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 import math,requests
-from django.db.models import Q,F, FloatField
-from django.db.models.functions import Cast
+from Slot.models import TurfSlot,BadmintonSlot,SwimmingSlot
 from math import radians, cos, sin, acos
+from django.db.models.functions import Cast
 from decimal import Decimal
-
 
 class TurfViewSet(viewsets.ModelViewSet):
     queryset = Turf.objects.all()
@@ -64,7 +63,10 @@ class TurfViewSet(viewsets.ModelViewSet):
         Badminton_Booking.update_status_for_all()
         Swimming_Booking.update_status_for_all()
         
-
+        TurfSlot.schedule_deletion_for_unbooked_slots()
+        BadmintonSlot.schedule_deletion_for_unbooked_slots()
+        SwimmingSlot.schedule_deletion_for_unbooked_slots()
+        
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
     
@@ -77,7 +79,6 @@ class TurfViewSet(viewsets.ModelViewSet):
             validated_data = serializer.validated_data.copy()
             validated_data['latitude'] = Decimal(lat)
             validated_data['longitude'] = Decimal(lon)
-            print(lat,lon)
             validated_data['User'] = self.request.user
             
             # Create the turf instance
@@ -149,6 +150,7 @@ class TurfViewSet(viewsets.ModelViewSet):
         # Calculate the distance
         distance = R * c
         return distance
+
 class SportsViewSet(viewsets.ModelViewSet):
     queryset = Sports.objects.all()
     serializer_class = SportsSerializer
@@ -215,14 +217,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['turf'] 
+    filterset_fields = ['user', 'turf'] 
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = self.queryset
-        turf_id = self.request.query_params.get('turf', None)
-        if turf_id is not None:
-            queryset = queryset.filter(turf_id=turf_id)
+        if self.action == 'list' and self.request.user.is_authenticated:
+            return self.queryset.filter(user=self.request.user)
         return super().get_queryset()
 
     def perform_create(self, serializer):
