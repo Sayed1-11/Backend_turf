@@ -1,11 +1,12 @@
 from django.db import models
-from datetime import datetime
+from datetime import time, timedelta
 from django.core.exceptions import ValidationError
 from Turf.models import *
 from  django.db.models import Sum
 from User.models import UserModel
 from django.db.models.signals import post_save
 import math
+from threading import Timer
 # Assuming TimeSlot and other related models are defined appropriately
 
 class BaseSlot(models.Model):
@@ -29,8 +30,20 @@ class BaseSlot(models.Model):
                 raise ValidationError("End time must be after start time.")
     
     def save(self, *args, **kwargs):
-        self.clean()
         super().save(*args, **kwargs)
+
+        
+
+    @classmethod
+    def schedule_deletion_for_unbooked_slots(cls):
+        print(cls)
+        def delete_unbooked_slots():
+            unbooked_slots = cls.objects.filter(is_booked=False)
+            for slot in unbooked_slots:
+                    slot.delete()
+                    print(f"Slot {slot.id} deleted due to inactivity.")
+    
+        Timer(120, delete_unbooked_slots).start()
     
     def calculate_duration(self):
         start_datetime = datetime.combine(self.date, self.start_time)
@@ -173,24 +186,17 @@ class SwimmingSlot(models.Model):
     def __str__(self):
         return f"{self.turf.name} ({self.field.field_type}) - {self.date} in {self.session}"
     
-from datetime import time, timedelta
+    @classmethod
+    def schedule_deletion_for_unbooked_slots(cls):
+        print(cls)
+        def delete_unbooked_slots():
+            unbooked_slots = cls.objects.filter(is_booked=False)
+            for slot in unbooked_slots:
+                    slot.delete()
+                    print(f"Slot {slot.id} deleted due to inactivity.")
+    
+        Timer(120, delete_unbooked_slots).start()
 
-def create_hourly_sessions():
- 
-    start_of_day = time(6, 0)
-    end_of_day = time(21, 0)
-    current_time = start_of_day
-
-    while current_time < end_of_day:
-        end_time = (datetime.combine(datetime.today(), current_time) + timedelta(hours=1)).time()
-        session = SwimmingSession.objects.create(
-            start_time=current_time,
-            end_time=end_time,
-            capacity=20, 
-            price_per_person=200.00  
-        )
-        session.save()
-        current_time = end_time
 
 class SlotHistory(models.Model):
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE,null=True )
